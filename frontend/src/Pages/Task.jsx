@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Stack,
   Text,
@@ -6,20 +6,15 @@ import {
   Button,
   Flex,
 } from '@chakra-ui/react'
-import { useDispatch, useSelector } from 'react-redux';
-import { addSprintsFailure, addSprintsRequest, addSprintsSuccess } from '../Redux/SprintReducer/action';
 import { useEffect } from 'react';
-import CreateSprintModal from '../Components/SprintPopup';
-import CreateTaskModal from '../Components/TaskPopup';
 
-const Home = () => {
+const Task = () => {
 
-  const SprintsData = useSelector((store) => store.SprintReducer.sprints);
+  const [task, setTask] = useState();
+
   let Token = JSON.parse(localStorage.getItem("token")) || "";
-  const dispatch = useDispatch();
 
   const fetchData = (url) => {
-    dispatch(addSprintsRequest('...Loading'));
     fetch(url, {
       method: "GET",
       headers: {
@@ -28,19 +23,17 @@ const Home = () => {
     })
       .then((res) => res.json())
       .then((res) => {
-        // console.log(res);
-        dispatch(addSprintsSuccess(res.sprints));
-
+        setTask(res.task);
       }).catch((err) => {
-        dispatch(addSprintsFailure(err));
+        alert(err.message)
       });
 
   }
 
   const HandleUpdate = (el) => {
-    el["status"] = !el["status"];
-
-    fetch(`https://paypal-j03v.onrender.com/sprint/${el._id}`, {
+    el.status = !el.status;
+    console.log(el)
+    fetch(`https://paypal-j03v.onrender.com/task/${el._id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -50,20 +43,17 @@ const Home = () => {
     })
       .then((res) => res.json())
       .then((res) => {
-        console.log(res);
-        fetchData("https://paypal-j03v.onrender.com/sprint");
+        fetchData("https://paypal-j03v.onrender.com/task");
         alert(res.message);
-        dispatch(addSprintsSuccess(res.sprints));
       })
       .catch((err) => {
         alert(err.message);
-        dispatch(addSprintsFailure(err));
       });
   };
 
 
   const handleDelete = (el) => {
-    fetch(`https://paypal-j03v.onrender.com/sprint/${el._id}`, {
+    fetch(`https://paypal-j03v.onrender.com/task/${el._id}`, {
       method: "DELETE",
       headers: {
         "authorization": `${Token}`
@@ -71,30 +61,27 @@ const Home = () => {
     })
       .then((res) => res.json())
       .then((res) => {
-        // console.log(res);
-        fetchData("https://paypal-j03v.onrender.com/sprint")
-        alert(res.message)
-        dispatch(addSprintsSuccess(res.sprints));
+        console.log(res);
+        fetchData("https://paypal-j03v.onrender.com/task")
+        alert(res)
       }).catch((err) => {
         alert(err.message);
-        dispatch(addSprintsFailure(err));
-
       });
   }
   useEffect(() => {
-    fetchData("https://paypal-j03v.onrender.com/sprint");
+    fetchData("https://paypal-j03v.onrender.com/task");
   }, [])
-  // console.log(SprintsData)
+
 
   return (
     <>
-      <CreateSprintModal fetchData={fetchData} />
       <Stack>
-        {SprintsData && SprintsData.length > 0 && SprintsData?.map((e) =>
+        {task && task.length > 0 && task?.map((e) =>
           <HStack border={"1px solid red"} p={"5px"} bg="pink.100" color={e.status ? 'black' : 'red'} key={e._id} display="flex" flexDirection={"column"} gap={"20px"} justifyContent="space-evenly">
             <Flex justifyContent={"space-evenly"} w={"80%"}>
-              <Text>Sprint :{e.title}</Text>
+              <Text>Task :{e.title}</Text>
               <Text>Status :{e.status ? "Active" : "Pending"}</Text>
+              <Text>Assigned to : {e.assign}</Text>
             </Flex>
             <Flex justifyContent={"space-evenly"} w={"80%"} >
               <Text>Description :{e.description}</Text>
@@ -103,7 +90,6 @@ const Home = () => {
             <Flex justifyContent={"space-evenly"} w={"80%"}>
               <Button bg={e.status ? "green" : "red"} color={e.status ? "red" : "white"} onClick={() => HandleUpdate(e)}>Change Status</Button>
               <Button bg={"red"} color="white" onClick={() => handleDelete(e)}>Delete</Button>
-              <CreateTaskModal sprintID={e._id}/>
             </Flex>
           </HStack>
         )}
@@ -112,4 +98,4 @@ const Home = () => {
   )
 }
 
-export default Home
+export default Task

@@ -1,4 +1,4 @@
-import { Flex, Box, Spacer, IconButton, useDisclosure } from "@chakra-ui/react";
+import { Flex, Box, Spacer, useDisclosure } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import {Link} from "react-router-dom"
 
@@ -37,10 +37,13 @@ const Navbar = () => {
         fontSize={"20px"}
       >
         <Box padding={4} marginLeft={{ base: 0, md: 6 }}>
-          <Link to="/login">Login</Link>
+          <Link to="/task">Task</Link>
         </Box>
         <Box padding={4} marginLeft={{ base: 0, md: 6 }}>
           <Link to="/signup">Signup</Link>
+        </Box>
+        <Box padding={4} marginLeft={{ base: 0, md: 6 }}>
+          <Link to="/login">Login</Link>
         </Box>
       </Box>
     </Flex>

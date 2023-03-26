@@ -25,7 +25,7 @@ const SignupForm = () => {
         e.preventDefault();
         // Submit form data to backend
         if (formData.email.length > 0 && formData.password.length > 0) {
-            const response = await fetch("http://localhost:8080/user/signup", {
+            const response = await fetch("https://paypal-j03v.onrender.com/user/signup", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

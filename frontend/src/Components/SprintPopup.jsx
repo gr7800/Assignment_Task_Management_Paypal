@@ -1,8 +1,7 @@
 import React, { useState } from "react"
-import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Textarea, Button, useDisclosure, Box } from "@chakra-ui/react"
-import axios from "axios"
-import { useDispatch } from "react-redux"
-import { addSprintFailure, addSprintRequest, addSprintSuccess, createSprint } from "../Redux/SprintReducer/action"
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Button, useDisclosure, Box, Input } from "@chakra-ui/react"
+import { useDispatch, useSelector } from "react-redux"
+import {  addSprintRequest, addSprintSuccess } from "../Redux/SprintReducer/action"
 
 const CreateSprintModal = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -12,43 +11,36 @@ const CreateSprintModal = () => {
     const [targetDate, setTargetDate] = useState("")
     const dispatch = useDispatch()
 
+    let Token = JSON.parse(localStorage.getItem("token")) || "";
+    let user = JSON.parse(localStorage.getItem("user")) || "";
+    console.log(Token, user)
+    let isAuth = useSelector((store) => store.authReducer.isAuth);
     const handleSprint = async () => {
-        onClose();
-        let user = localStorage.getItem("user")
+
         dispatch(addSprintRequest('...Loading'));
 
-        let Token = JSON.parse(localStorage.getItem("token")) || "";
+        let data = { title, description, startDate, targetDate, users: [user], status: false, userID: user._id }
 
-        fetch("http://localhost:8080/sprint", {
-
+        const response = await fetch("https://paypal-j03v.onrender.com/sprint/", {
             method: "POST",
-
             headers: {
-
+                "Content-Type": "application/json",
                 "authorization": `${Token}`
-
             },
+            body: JSON.stringify(data),
+        });
+        const gt = await response.json();
+        // console.log(gt)
+        dispatch(addSprintSuccess(gt.sprint));
+        alert(gt.message);
+        onClose();
 
-            body: JSON.stringify({ title, description, startDate, targetDate, users: [user], status: false })
-
-        }).then((res) => res.json())
-
-            .then((res) => {
-
-                alert(res.message);
-                console.log(res);
-                // dispatch(addSprintSuccess({ title, description, startDate, targetDate, status: false }));
-
-            }).catch((err) => {
-
-                dispatch(addSprintFailure(err));
-
-            });
     }
 
     return (
         <>
-            <Box display={'flex'} justifyContent='flex-end' p='2%'>
+            <Box display={'flex'} justifyContent="space-evenly" p='2%'>
+                <Box fontSize={"20px"} fontWeight={"bold"} color="red"> {isAuth ? `Welcome to Paypal Task Mangement App ${user.name}` : "Please Login Fist"}</Box>
                 <Button onClick={onOpen}>Create Sprint</Button>
             </Box>
             <Modal isOpen={isOpen} onClose={onClose}>
@@ -57,10 +49,10 @@ const CreateSprintModal = () => {
                     <ModalHeader>Create a Sprint</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <Textarea placeholder="Enter a sprint title..." onChange={(e) => setTitle(e.target.value)} />
-                        <Textarea placeholder="Enter a sprint description..." mt={4} onChange={(e) => setDescription(e.target.value)} />
-                        <Textarea placeholder="Enter a start date..." mt={4} onChange={(e) => setStartDate(e.target.value)} />
-                        <Textarea placeholder="Enter a target date..." mt={4} onChange={(e) => setTargetDate(e.target.value)} />
+                        <Input type={"text"} placeholder="Enter a sprint title..." onChange={(e) => setTitle(e.target.value)} />
+                        <Input type={"text"} placeholder="Enter a sprint description..." mt={4} onChange={(e) => setDescription(e.target.value)} />
+                        <Input type={"date"} placeholder="Enter a start date..." mt={4} onChange={(e) => setStartDate(e.target.value)} />
+                        <Input type={"date"} placeholder="Enter a target date..." mt={4} onChange={(e) => setTargetDate(e.target.value)} />
                     </ModalBody>
                     <ModalFooter>
                         <Button colorScheme="blue" mr={3} onClick={handleSprint}>

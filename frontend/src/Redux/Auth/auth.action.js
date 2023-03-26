@@ -5,7 +5,7 @@ export const login = (creds) => async (dispatch) => {
   dispatch({ type: LOGIN_REQUEST })
   console.log(creds,"hii")
   try {
-    const response = await fetch("http://localhost:8080/user/login", {
+    const response = await fetch("https://paypal-j03v.onrender.com/user/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
