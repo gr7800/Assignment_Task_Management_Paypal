@@ -8,7 +8,7 @@ const taskSchema = new mongoose.Schema({
   assign: { type: String, required: true },
   startDate: { type: String, required: true },
   targetDate: { type: String, required: true },
-  status: { type: String, required: true },
+  status: { type: Boolean, required: true },
   userID: { type: String, required: true },
   sprintID: { type: String, required: true },
 });

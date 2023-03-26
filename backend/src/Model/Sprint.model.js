@@ -3,13 +3,13 @@ const mongoose = require("mongoose")
 
 // Define the schema for the Sprint model
 const sprintSchema = mongoose.Schema({
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  startDate: { type: String, required: true },
-  targetDate: { type: String, required: true },
-  users:[],
+  title: { type: String },
+  description: { type: String },
+  startDate: { type: String },
+  targetDate: { type: String },
+  users: [],
   status: { type: Boolean, default: false },
-  userID: { type: String, required: true },
+  userID: { type: String },
 })
 
 // Create a Mongoose model for the Sprint schema and export

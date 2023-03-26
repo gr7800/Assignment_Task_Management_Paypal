@@ -1,4 +1,5 @@
 const express = require("express");
+const TaskModel = require("../Model/Task.model");
 const Task = require("../Model/Task.model");
 
 // Create a router for the task routes
@@ -8,9 +9,9 @@ const taskRouter = express.Router();
 exports.GetAllTask = async (req, res) => {
     const userID = req.body.userID;
     try {
-        const tasks = await Task.find({ userID });
-        if (tasks) {
-            return res.status(200).send({ tasks, message: "All task get suceesfully" });
+        const task = await Task.find({ userID });
+        if (task) {
+            return res.status(200).send({ task, message: "All task get suceesfully" });
         }
     } catch (error) {
         return res.status(401).send(error.message);
@@ -32,42 +33,47 @@ exports.PostTask = async (req, res) => {
 
 // PATCH a task by ID
 exports.UpdateTask = async (req, res) => {
-    const taskId = req.params.taskId;
-    const userID = req.body.userID;
-    const task = await Task.findById(taskId);
-    if (userID !== task.userID) {
-        return res.status(401).send("Not authorized");
-    } else {
-        try {
-            const updatedTask = await Task.findByIdAndUpdate(taskId, req.body, {
-                new: true,
-            });
-            res.send({
-                msg: "Task updated successfully",
-                task: updatedTask,
-            });
-        } catch (err) {
-            console.log(err);
-            return res.status(500).send({ err: "Something went wrong" });
+    const { taskID } = req.params;
+    const { userID } = req.body;
+    try {
+
+        const task = await TaskModel.findById(taskID);
+       
+        if (userID !== task.userID) {
+            return res.status(403).json({ err: "Not authorized" });
+        } else {
+            const updatedtask = await TaskModel.findByIdAndUpdate(
+                taskID,
+                req.body,
+                { new: true }
+            );
+            // let temp = await (TaskModel.findById(taskID));
+            return res.status(200).send({ message: "task updated successfully", task: updatedtask });
         }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal server error" });
     }
 };
 
 // DELETE a task by ID
 exports.DELTETASK = async (req, res) => {
-    const taskId = req.params.taskId;
-    const userID = req.body.userID;
-    const task = await Task.findById(taskId);
+    const { taskID } = req.params;
+
+    const { userID } = req.body;
+
+    // Find the task in the database by ID
+    const task = await TaskModel.findById(taskID);
+
+    // If the user ID does not match the task's userID, return an error message
     if (userID !== task.userID) {
-        return res.status(401).send("Not authorized");
+        return res.status(401).send({ message: "Not authorized" });
     } else {
-        try {
-            await Task.findByIdAndDelete(taskId);
-            return res.status(200).send({ msg: "Task deleted successfully" });
-        } catch (err) {
-            console.log(err);
-            return res.status(500).send({ err: "Something went wrong" });
-        }
+        // Otherwise, delete the task from the database
+        await TaskModel.findByIdAndDelete(taskID);
+
+        // Return a success message as a JSON response
+        return res.status(200).send({ message: "task deleted successfully" });
     }
 };
 

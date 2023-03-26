@@ -1,5 +1,5 @@
 const express = require("express");
-const  SprintModel  = require("../Model/Sprint.model");
+const SprintModel = require("../Model/Sprint.model");
 
 // Create a new instance of the Express router
 
@@ -22,6 +22,7 @@ exports.PostSprintData = async (req, res) => {
     const payload = req.body;
 
     // TODO: Get the user token from the request header and verify it using JWT
+    console.log(req.body);
 
     try {
         // Create a new instance of the Sprint model with the payload data
@@ -31,18 +32,43 @@ exports.PostSprintData = async (req, res) => {
         await newSprint.save();
 
         // Return a success message as a JSON response
-        return res.status(200).send({ message: "Sprint added successfully" });
+        return res.status(200).send({ message: "Sprint added successfully",sprint:newSprint });
     } catch (err) {
 
         // If there was an error, log it and return an error message as a JSON response
         console.log(err);
-       return res.status(500).json({ err: "Something went wrong" });
+        return res.status(500).json({ message: "Something went wrong" });
     }
 };
 
-exports.UpdateSprintData= async (req, res) => {
+exports.UpdateSprintData = async (req, res) => {
+    const { sprintID } = req.params;
+    const { userID } = req.body;
+    try {
+        console.log(sprintID)
+        const sprint = await SprintModel.findById(sprintID);
+
+        if (userID !== sprint.userID) {
+            return res.status(403).json({ err: "Not authorized" });
+        } else {
+            const updatedSprint = await SprintModel.findByIdAndUpdate(
+                sprintID,
+                req.body,
+                { new: true }
+            );
+            let temp = await (SprintModel.findById(sprintID));
+            return res.status(200).send({ message: "Sprint updated successfully", sprint: temp });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal server error" });
+    }
+};
+
+exports.DELETESPRINT = async (req, res) => {
     // Extract the Sprint ID and user ID from the request
     const { sprintID } = req.params;
+
     const { userID } = req.body;
 
     // Find the Sprint in the database by ID
@@ -50,32 +76,12 @@ exports.UpdateSprintData= async (req, res) => {
 
     // If the user ID does not match the Sprint's userID, return an error message
     if (userID !== sprint.userID) {
-        return res.status(403).json({ err: "Not authorized" });
-    } else {
-        // Otherwise, update the Sprint with the new data
-        await SprintModel.findByIdAndUpdate(sprintID, req.body);
-
-        // Return a success message as a JSON response
-        return res.status(200).send({ message: "Sprint updated successfully" });
-    }
-};
-
-exports.DELETESPRINT= async (req, res) => {
-    // Extract the Sprint ID and user ID from the request
-    const { sprintID } = req.params;
-    const { userID } = req.body;
-
-    // Find the Sprint in the database by ID
-    const sprint = await SprintModel.findById(sprintID);
-
-    // If the user ID does not match the Sprint's userID, return an error message
-    if (userID !== sprint.userID) {
-       return res.status(401).send({ message: "Not authorized" });
+        return res.status(401).send({ message: "Not authorized" });
     } else {
         // Otherwise, delete the Sprint from the database
         await SprintModel.findByIdAndDelete(sprintID);
 
         // Return a success message as a JSON response
-       return res.status(200).send({ message: "Sprint deleted successfully" });
+        return res.status(200).send({ message: "Sprint deleted successfully" });
     }
 };
