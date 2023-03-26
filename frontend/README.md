@@ -1,5 +1,7 @@
 # Getting Started with Create React App
 
+this is the netlify link of website it take lot of time to excute because i depoyed the backend on render  evrything is working perfectly fine but its take lot of time [Deployed Link](https://zippy-jelly-0e966c.netlify.app/)
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
